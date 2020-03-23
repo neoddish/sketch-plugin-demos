@@ -1,0 +1,23 @@
+{
+  "compatibleVersion": 58,
+  "bundleVersion": 1,
+  "commands": [
+    {
+      "name": "my-command",
+      "identifier": "template-react.my-command-identifier",
+      "script": "./my-command.js",
+      "handlers": {
+        "run": "onRun",
+        "actions": {
+          "Shutdown": "onShutdown"
+        }
+      }
+    }
+  ],
+  "menu": {
+    "title": "template-React",
+    "items": [
+      "template-react.my-command-identifier"
+    ]
+  }
+}

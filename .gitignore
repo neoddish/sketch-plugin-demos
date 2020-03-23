@@ -1,0 +1,20 @@
+config.json
+
+# build artefacts
+*.sketchplugin
+*.zip
+
+# npm
+node_modules
+.npm
+.npmrc
+npm-debug.log
+
+# mac
+.DS_Store
+
+# WebStorm
+.idea
+
+# sketch
+# sketch-assets

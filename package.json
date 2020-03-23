@@ -1,0 +1,22 @@
+{
+  "name": "sketch-plugin-demos",
+  "version": "1.0.0",
+  "description": "Just demos.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jiazhewang/sketch-plugin-demos.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jiazhewang/sketch-plugin-demos/issues"
+  },
+  "homepage": "https://github.com/jiazhewang/sketch-plugin-demos#readme",
+  "dependencies": {
+    "sketch-module-web-view": "^3.4.1"
+  }
+}
