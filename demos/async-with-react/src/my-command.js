@@ -30,9 +30,17 @@ export default function() {
   // add a handler for a call from web content's javascript
   webContents.on("sayhi", s => {
     UI.message(s);
-    webContents
-      .executeJavaScript(`result(${JSON.stringify(s)})`)
-      .catch(console.error);
+
+    // We need something that takes a while....
+    log("start compute n");
+    // This may take 6~8 seconds.
+    let n = 0;
+    for (let i = 0; i < 3000000000; i++) {
+      n = n + 1;
+    }
+    log("done compute n");
+
+    webContents.executeJavaScript(`result(${n})`).catch(console.error);
   });
 
   browserWindow.loadURL(require("../resources/webview.html"));
