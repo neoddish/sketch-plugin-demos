@@ -1,4 +1,7 @@
 module.exports = function(config, entry) {
+  config.entry = config.entry.includes("@babel/polyfill")
+    ? config.entry
+    : ["@babel/polyfill", config.entry];
   config.node = entry.isPluginCommand
     ? false
     : {
