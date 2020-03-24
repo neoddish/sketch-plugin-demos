@@ -4,6 +4,10 @@ module.exports = function(config, entry) {
     : {
         setImmediate: false
       };
+  // https://sketchplugins.com/d/1205-guide-how-to-use-async-await-functions-in-your-plugin
+  config.entry = config.entry.includes("@babel/polyfill")
+    ? config.entry
+    : ["@babel/polyfill", config.entry];
   config.resolve.extensions = [".sketch.js", ".js", ".jsx"];
   config.module.rules.push({
     test: /\.(html)$/,
