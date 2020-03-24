@@ -1,25 +1,40 @@
 import BrowserWindow from "sketch-module-web-view";
 import { getWebview } from "sketch-module-web-view/remote";
 import UI from "sketch/ui";
+import MochaJSDelegate from "mocha-js-delegate";
 
 const webviewIdentifier = "async-with-react.webview";
 
-// from https://blog.magicsketch.io/interacting-with-objective-c-classes-in-cocoascript-68be7f39616f
-const Class = function(className, BaseClass, selectorHandlerDict) {
-  const uniqueClassName = className + NSUUID.UUID().UUIDString();
-  const delegateClassDesc = MOClassDescription.allocateDescriptionForClassWithName_superclass_(
-    uniqueClassName,
-    BaseClass
-  );
-  for (let selectorString in selectorHandlerDict) {
-    delegateClassDesc.addInstanceMethodWithSelector_function_(
-      selectorString,
-      selectorHandlerDict[selectorString]
-    );
+const Delegate = new MochaJSDelegate({
+  "doSomething:": args => {
+    const resolve = args[0];
+    const reject = args[1];
+
+    try {
+      log("ccc 1");
+      // This may take 6~8 seconds.
+      let n = 0;
+      for (let i = 0; i < 3000000000; i++) {
+        n = n + 1;
+      }
+      log("ccc 2");
+      log(n);
+      resolve(n);
+    } catch (err) {
+      log(err);
+      reject(err);
+    }
+  },
+  "notifyStatus:": args => {
+    const webContents = args[0];
+    const msg = args[1];
+
+    const str = `${msg}`;
+
+    log("IIII");
+    webContents.executeJavaScript(`result(${str})`).catch(console.error);
   }
-  delegateClassDesc.registerClass();
-  return NSClassFromString(uniqueClassName);
-};
+});
 
 export default function() {
   const options = {
@@ -44,111 +59,43 @@ export default function() {
     UI.message("UI loaded!");
   });
 
-  const computeN = () => {
-    log("ccc 1");
-    // This may take 6~8 seconds.
-    let n = 0;
-    for (let i = 0; i < 3000000000; i++) {
-      n = n + 1;
-    }
-    log("ccc 2");
-    return n;
-  };
-
-  // failed
-  const longRun = () => {
-    const fiber = require("sketch/async").createFiber();
-
-    log("long run p");
-
-    return new Promise(async (resolve, reject) => {
-      // We need something that takes a while....
-      log("start compute n");
-
-      log("xxxxx");
-      const n = computeN();
-
-      fiber.cleanup();
-
-      log("done compute n");
-      log(n);
-      resolve(n);
-    });
-  };
-
   // add a handler for a call from web content's javascript
   webContents.on("sayhi", s => {
-    UI.message("start...");
+    UI.message("start.....5");
 
-    // const fiber = require("sketch/async").createFiber();
+    log("111");
 
-    // longRun()
-    //   .then(res => {
-    //     webContents.executeJavaScript(`result(${res})`).catch(console.error);
-    //   })
-    //   .catch(err => log(err));
+    const delegate = Delegate.getClassInstance();
 
-    var Exporter = Class("Exporter", NSObject, {
-      "exportImageWithParameters:": args => {
-        const resolve = args[0];
-        const reject = args[1];
-
-        try {
-          log("bbbbb");
-          const res = computeN();
-          log("dddd");
-          log("res");
-          log(res);
-
-          
-          
-
-          resolve(res);
-
-          log("eee");
-        } catch (err) {
-          reject(err);
-        }
-
-        // coscript.setShouldKeepAround(false);
-        
-      },
-      "hello:": args => {
-        const result = args[0];
-
-        log("IIII");
-        webContents.executeJavaScript(`result(${result})`).catch(console.error);
-      }
-    });
-
-    var exporter = Exporter.new();
+    log("222");
 
     (async () => {
-      log("x");
+      try {
+        log("xxx 10");
 
-      const re = await new Promise((resolve, reject) => {
-        log("aaaaaa");
+        const result = await new Promise((resolve, reject) => {
+          log("aaaaaa");
 
-        exporter.performSelectorInBackground_withObject(
-          "exportImageWithParameters:",
-          [resolve, reject]
+          delegate.performSelectorInBackground_withObject("doSomething:", [
+            resolve,
+            reject
+          ]);
+        });
+
+        log("yy");
+        log(result);
+
+        delegate.performSelectorOnMainThread_withObject_waitUntilDone(
+          "notifyStatus:",
+          [webContents, result],
+          true
         );
-        // fiber.cleanup();
-        
-      });
 
-      
-
-      log("yy");
-      log(re);
-
-      exporter.performSelectorOnMainThread_withObject_waitUntilDone(
-        "hello:",
-        [re],
-        true
-      );
-
-      log("zz");
+        log("zz");
+      } catch (err) {
+        log("err");
+        log(err);
+      }
     })();
   });
 
